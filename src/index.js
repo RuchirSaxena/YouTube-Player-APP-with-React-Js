@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import YTSearch from 'youtube-api-search';
+import _ from 'lodash';
 
 import SearchBar from './components/search_bar';
 import VideoList from './components/video_list';
@@ -17,17 +18,23 @@ class App extends React.Component {
             videos: [],
             seletedVideo: null
         };
-        YTSearch({ key: API_KEY, term: 'react js' }, (videos) => {
-            console.log(videos);
-            this.setState({
-                videos: videos,
-                seletedVideo: videos[0]
-            });
-        });
-
+        this.onVideoSearch('react js');
     }
 
-    onVideoSelect(selectedVideo) {
+    onVideoSearch = (searchTerm) => {
+       // debugger;
+        YTSearch({ key: API_KEY, term: searchTerm }, (videos) => {
+            console.log(videos);
+            this.setState(() => {
+                return {
+                    videos: videos,
+                    seletedVideo: videos[0]
+                }
+            });
+        });
+    }
+
+    onVideoSelect = (selectedVideo) => {
         this.setState(() => {
             return {
                 seletedVideo: selectedVideo
@@ -35,11 +42,15 @@ class App extends React.Component {
         });
     }
     render() {
+        const videoSerarch = _.debounce((searchTerm) => {
+            debugger;
+            this.onVideoSearch(searchTerm)
+        },1000);
         return (
             <React.Fragment>
-                <SearchBar />
+                <SearchBar onVideoSearch={videoSerarch} />
                 <VideoDetail video={this.state.seletedVideo} />
-                <VideoList onVideoSelect={this.onVideoSelect.bind(this)} videos={this.state.videos} />
+                <VideoList onVideoSelect={this.onVideoSelect} videos={this.state.videos} />
             </React.Fragment>
         );
     }
